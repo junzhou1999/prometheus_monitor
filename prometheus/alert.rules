@@ -1,0 +1,12 @@
+groups:
+- name: node-alert
+  rules:
+  - alert: service_down
+    expr: up == 0
+    for: 2m
+  - alert: high_load
+    expr: node_load1 > 0.5
+    for: 5m
+    annotations: 
+      summary: "这是node-exporter服务的一个告警示例"
+      description: "告警名称，触发条件，评估时间"

@@ -1,0 +1,29 @@
+docker run -d -p 9100:9100 \
+--restart=always \
+--name=node-exporter \
+-v /proc:/host/proc \
+-v /sys:/host/sys \
+-v /:/rootfs \
+prom/node-exporter \
+--path.procfs /proc \
+--path.sysfs /sys \
+--path.rootfs / \
+--collector.filesystem.mount-points-exclude "^/(sys|proc|dev|host|etc)($|/)"
+
+https://github.com/google/cadvisor
+
+docker run \
+--volume=/:/rootfs:ro \
+--volume=/var/run:/var/run:ro \
+--volume=/sys:/sys:ro \
+--volume=/var/lib/docker/:/var/lib/docker:ro \
+--volume=/dev/disk/:/dev/disk:ro \
+--publish=8080:8080 \
+--detach=true \
+--name=cadvisor \
+--privileged \
+--device=/dev/kmsg \
+junzhou99/cadvisor
+
+
+

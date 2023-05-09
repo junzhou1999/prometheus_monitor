@@ -1,0 +1,68 @@
+version: "3.8"
+services:
+  node-exporter:
+    container_name: node-exporter
+    image: prom/node-exporter:v1.5.0
+    ports:
+      - "9100:9100"
+    # network_mode: bridge
+    restart: always
+    volumes:
+      - /proc:/host/proc
+      - /sys:/host/sys
+      - /:/rootfs
+    command: [
+          '--path.procfs=/proc',
+          '--path.sysfs=/sys',
+          '--path.rootfs=/',
+          '--collector.filesystem.mount-points-exclude="^/(sys|proc|dev|host|etc)($|/)"'
+          ]
+
+  cadvisor:
+    container_name: cadvisor
+    image: junzhou99/cadvisor:v0.47.0
+    ports :
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro 
+      - /sys:/sys:ro \
+      - /var/lib/docker/:/var/lib/docker:ro 
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev:kmsg:/dev/kmsg
+    privileged: true
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v2.43.0
+    user: root
+    ports :
+      - "9090:9090"
+    volumes:
+      # 保存监控TSDB数据
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alert.rules:/etc/prometheus/alert.rules
+      - ./prometheus/prometheus_data:/prometheus
+    command: [
+      '--config.file=/etc/prometheus/prometheus.yml',
+      '--storage.tsdb.path="/prometheus"',
+      '--storage.tsdb.retention.time=30d',
+      '--web.enable-lifecycle'
+      ] 
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:9.5.1-ubuntu
+    user: root
+    ports :
+      - "3000:3000"
+    volumes:
+      # 持久化配置
+      - ./grafana/data:/data:rw
+    environment:
+      - GF_PATHS_DATA=/data
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=123456
+      - GF_USERS_ALLOW_SIGN_UP=false      
+    

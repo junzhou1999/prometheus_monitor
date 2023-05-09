@@ -1,0 +1,32 @@
+global:
+    scrape_interval: 15s       # 数据来源抓取周期
+    evaluation_interval: 15s   # 评估时间
+    external_labels:
+        monitor: 'my-monitor'
+scrape_configs:
+    - job_name: 'prometheus'
+      static_configs:
+          - targets: ['localhost:9090']
+    - job_name: 'node-resources'
+      scrape_interval: 10s
+      static_configs:
+          - targets: 
+            - 'node-exporter:9100'
+    - job_name: 'cadvisor-resources'
+      scrape_interval: 10s
+      static_configs:
+          - targets:
+            - 'cadvisor:8080'
+    - job_name: 'node-remote'
+      scrape_interval: 15s
+      static_configs:
+          - targets:
+            - '192.168.243.25:9100'
+    - job_name: 'cadvisor-remote'
+      scrape_interval: 15s
+      static_configs:
+          - targets:
+            - '192.168.243.25:8080'
+# 告警规则
+rule_files:
+  - 'alert.rules'
